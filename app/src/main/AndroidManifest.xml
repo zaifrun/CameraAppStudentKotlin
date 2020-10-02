@@ -5,9 +5,6 @@
     <uses-feature android:name="android.hardware.camera"
                   android:required="true" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- notice we ONLY need the write_external storage permission on older versions of android
-         in newer versions (from API 19) an app always has permission to its own app directory-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -26,7 +23,7 @@
         </activity>
 
         <provider
-                android:name="android.support.v4.content.FileProvider"
+                android:name="androidx.core.content.FileProvider"
                 android:authorities="org.pondar.cameraappstudentkotlin.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">

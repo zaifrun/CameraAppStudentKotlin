@@ -7,11 +7,12 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.support.v4.content.FileProvider
+import android.util.Log
+import androidx.core.content.FileProvider
 import android.widget.ImageView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -22,16 +23,14 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-
-
     private lateinit var context: Context
     private lateinit var imageBitmap: Bitmap
     private val REQUEST_IMAGE_CAPTURE = 1
     private lateinit var imageView: ImageView //for displaying the image.
     private var mCurrentPhotoPath: String? = null //for storing the path to the image taken.
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             //NOTICE we do not get any data directly back from the intent
             //but the camera app will take the picture and save it in the uri
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             // Create the File where the photo should go
             var photoFile: File? = null
             try {
-                photoFile = createImageFile()
+                photoFile = createImageFile()  //create an image file to use
             } catch (ex: IOException) {
                 // Error occurred while creating the File
                 val toast = Toast.makeText(this, "Could not create file", Toast.LENGTH_SHORT)
@@ -76,23 +75,6 @@ class MainActivity : AppCompatActivity() {
                 )
                 //putting the URI in the Intent for the camera app to use
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-
-                // A hack to get it to work on older Android versions
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                    val resolvedIntentActivities = context.packageManager.queryIntentActivities(
-                        takePictureIntent,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                    )
-                    for (resolvedIntentInfo in resolvedIntentActivities) {
-                        val packageName = resolvedIntentInfo.activityInfo.packageName
-                        context.grantUriPermission(
-                            packageName,
-                            photoURI,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        )
-                    }
-                }//end of hack
-
                 //start the intent and wait for the result.
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
             }
@@ -119,7 +101,7 @@ class MainActivity : AppCompatActivity() {
 
         //you can take a look at this path in the android monitor - it will give you
         //some idea of what the path looks like - this is a VERY good idea.
-        println("storagedirectory:" + storageDir!!)
+        Log.d("myphoto", "storagedirectory:" + storageDir!!)
 
         //This creates an empty file.
         val image = File.createTempFile(
@@ -130,7 +112,7 @@ class MainActivity : AppCompatActivity() {
 
         // Save a file: path for use with ACTION_VIEW intents used later
         mCurrentPhotoPath = image.absolutePath
-        println("photo path:" + mCurrentPhotoPath!!)
+        Log.d("myphto", "photo path:" + mCurrentPhotoPath!!)
         return image
     }
 
@@ -141,13 +123,10 @@ class MainActivity : AppCompatActivity() {
         imageView = findViewById(R.id.imageView)
         context = this
 
-       // val pictureButton = findViewById(R.id.pictureButton)
         //putting a clicklistener on the button.
         pictureButton.setOnClickListener { dispatchTakePictureIntent() }
 
-        clearButton.setOnClickListener {imageView.setImageResource(0) }
-
-
+        clearButton.setOnClickListener { imageView.setImageResource(0) }
     }
 
 
